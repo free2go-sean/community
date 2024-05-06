@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.free2go.community.post.repository.PostMapper">
+    <select id="selectPost" resultType="com.free2go.community.post.domain.Post">
+        SELECT *
+        FROM POST
+        WHERE ID = #{id}
+    </select>
+</mapper>
