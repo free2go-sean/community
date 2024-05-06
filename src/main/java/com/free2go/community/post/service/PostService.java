@@ -17,9 +17,7 @@ public class PostService {
     public PostDto.PostRes getPostsById(Long id) throws Exception {
         Post post = postRepository.findById(id).orElseThrow(() -> new Exception("data not found"));
 
-        return PostDto.PostRes.builder()
-                .post(post)
-                .build();
+        return PostDto.PostRes.of(post);
     }
 
     public Post selectPosts(Long id) {

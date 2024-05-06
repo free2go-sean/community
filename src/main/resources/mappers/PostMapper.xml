@@ -3,7 +3,7 @@
 <mapper namespace="com.free2go.community.post.repository.PostMapper">
     <select id="selectPost" resultType="com.free2go.community.post.domain.Post">
         SELECT *
-        FROM POST
+        FROM post
         WHERE ID = #{id}
     </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.free2go.community.post.dto;
 
+import com.free2go.community.comment.dto.CommentDto;
 import com.free2go.community.post.domain.Post;
 import lombok.*;
 
@@ -13,15 +14,17 @@ public class PostDto {
         private String contents;
 
         @Builder
-        public PostRes(Post post) {
-            this.id = post.getId();
-            this.title = post.getTitle();
-            this.contents = post.getContents();
+        public PostRes(Long id, String title, String contents) {
+            this.id = id;
+            this.title = title;
+            this.contents = contents;
         }
 
         public static PostRes of(Post post) {
             return PostRes.builder()
-                    .post(post)
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .contents(post.getContents())
                     .build();
         }
     }
