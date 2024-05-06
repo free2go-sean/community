@@ -1,5 +1,6 @@
 package com.free2go.community.post.domain;
 
+import com.free2go.community.common.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,11 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity(name = "POST")
-public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
+public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
