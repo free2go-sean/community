@@ -17,8 +17,8 @@ public class PostController {
     }
 
     @GetMapping("/v1/posts/{id}")
-    public PostDto.PostRes getPosts(@PathVariable("id") Long id) throws Exception {
-        return postService.getPostsById(id);
+    public PostDto.PostRes getPosts(@PathVariable("id") Long id) {
+        return PostDto.PostRes.of(postService.getPostsById(id));
     }
 
     @PostMapping("/v1/posts")
