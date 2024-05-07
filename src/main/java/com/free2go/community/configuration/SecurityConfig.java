@@ -1,70 +1,60 @@
 package com.free2go.community.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.DispatcherType;
-import lombok.Getter;
+import com.free2go.community.user.service.UserDetailService;
+import com.free2go.community.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
-import java.io.PrintWriter;
-
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    private final UserDetailService userService;
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
-                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(
-                        frameOptionsConfig -> frameOptionsConfig.disable()
-                ))
-                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
-                        authorizationManagerRequestMatcherRegistry.requestMatchers(PathRequest.toH2Console()).permitAll()
-                                .requestMatchers("/", "/login/**").permitAll()
-                                .requestMatchers("/posts/**", "/v1/posts/**").hasRole(Role.USER.name())
-                                .anyRequest().authenticated()
-                );
-
-
-        return http.build();
+    public WebSecurityCustomizer configure() {
+        return (web) -> web.ignoring()
+//                .requestMatchers(toH2Console())
+                .requestMatchers("/static/**");
     }
 
-    private final AuthenticationEntryPoint unauthorizedEntryPoint = ((request, response, authException) -> {
-        ErrorResponse fail = new ErrorResponse(HttpStatus.UNAUTHORIZED, "Spring security unauthorized");
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        String json = new ObjectMapper().writeValueAsString(fail);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        PrintWriter writer = response.getWriter();
-        writer.write(json);
-        writer.flush();
-    });
+    // 특정 HTTP 요청에 대한 웹 기반 보안 구성
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/login", "/signup", "/user").permitAll()
+                                                                             .anyRequest().authenticated()) // 인증, 인가 설정
+                .formLogin(formLogin -> formLogin.loginPage("/login")
+                                                 .defaultSuccessUrl("/main"))
+                .logout(logoutConfig -> logoutConfig.logoutSuccessUrl("/login")
+                                                    .invalidateHttpSession(true))
+                .csrf(csrfConfig -> csrfConfig.disable())
+                .build();
+    }
 
-    private final AccessDeniedHandler accessDeniedHandler = ((request, response, accessDeniedException) -> {
-        ErrorResponse fail = new ErrorResponse(HttpStatus.FORBIDDEN, "Spring security forbidden");
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        String json = new ObjectMapper().writeValueAsString(fail);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        PrintWriter writer = response.getWriter();
-        writer.write(json);
-        writer.flush();
-    });
+    // 인증 관리자 관련 설정
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() throws Exception {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
 
-    @Getter
-    @RequiredArgsConstructor
-    public class ErrorResponse {
-        private final HttpStatus httpStatus;
-        private final String message;
+        daoAuthenticationProvider.setUserDetailsService(userService);
+        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
+
+        return daoAuthenticationProvider;
+    }
+
+    // 패스워드 인코더로 사용할 빈 등록
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
