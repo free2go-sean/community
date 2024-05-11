@@ -1,5 +1,6 @@
 package com.free2go.community.user.service;
 
+import com.free2go.community.user.domain.User;
 import com.free2go.community.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,6 @@ public class UserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException(email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not matches"));
     }
 }

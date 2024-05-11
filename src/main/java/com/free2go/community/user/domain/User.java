@@ -32,22 +32,28 @@ public class User implements UserDetails {
     @Column(name = "nickname", unique = true)
     private String nickname;
 
+    @ElementCollection
+    @Column(name = "roles")
+    private List<String> roles = new ArrayList<>();
+
     @Builder
-    public User(String email, String password, String nickname) {
+    public User(String email, String password, String nickname, List<String> roles) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.roles = roles;
     }
 
     public User update(String nickname) {
         this.nickname = nickname;
-
         return this;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .toList();
     }
 
     @Override

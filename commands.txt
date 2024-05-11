@@ -1,6 +1,6 @@
 docker volume create mysql-db
 docker network create springapp
-docker run --name community-mysql --network springapp -e MYSQL_ROOT_PASSWORD=root -d -v mysql-db:/var/lib/mysql mysql:latest
+docker run --name community-mysql -p 3306:3306 --network springapp -e MYSQL_ROOT_PASSWORD=root -v mysql-db:/var/lib/mysql -d mysql:latest
 
 docker exec -it community-mysql mysql -u root -p
 create database community;

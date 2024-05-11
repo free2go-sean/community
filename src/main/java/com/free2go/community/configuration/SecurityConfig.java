@@ -1,7 +1,8 @@
 package com.free2go.community.configuration;
 
+import com.free2go.community.configuration.jwt.TokenProvider;
 import com.free2go.community.user.service.UserDetailService;
-import com.free2go.community.user.service.UserService;
+import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +11,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -19,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final UserDetailService userService;
+    private final TokenProvider tokenProvider;
+
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
@@ -30,14 +35,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/login", "/signup", "/user").permitAll()
-                                                                             .anyRequest().authenticated()) // 인증, 인가 설정
-                .formLogin(formLogin -> formLogin.loginPage("/login")
-                                                 .defaultSuccessUrl("/main"))
-                .logout(logoutConfig -> logoutConfig.logoutSuccessUrl("/login")
-                                                    .invalidateHttpSession(true))
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/login" , "/signin","/signup", "/user", "/test").permitAll()
+                        .anyRequest().authenticated()) // 인증, 인가 설정
                 .csrf(csrfConfig -> csrfConfig.disable())
+                .formLogin(formLoginConfig -> formLoginConfig.disable())
+                .logout(logoutConfig -> logoutConfig.disable())
                 .build();
+    }
+
+    @Bean
+    public TokenAuthenticationFilter tokenAuthenticationFilter() {
+        return new TokenAuthenticationFilter(tokenProvider);
     }
 
     // 인증 관리자 관련 설정

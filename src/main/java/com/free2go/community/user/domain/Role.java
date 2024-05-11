@@ -1,4 +1,4 @@
-package com.free2go.community.configuration;
+package com.free2go.community.user.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
