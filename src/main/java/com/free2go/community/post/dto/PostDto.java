@@ -28,12 +28,12 @@ public class PostDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class PostReq {
+    public static class PostCreateReq {
         private String title;
         private String contents;
 
         @Builder
-        public PostReq(String title, String contents) {
+        public PostCreateReq(String title, String contents) {
             this.title = title;
             this.contents = contents;
         }
@@ -43,6 +43,19 @@ public class PostDto {
                     .title(this.title)
                     .contents(this.contents)
                     .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class PostUpdateReq {
+        private String title;
+        private String contents;
+
+        @Builder
+        public PostUpdateReq(String title, String contents) {
+            this.title = title;
+            this.contents = contents;
         }
     }
 }

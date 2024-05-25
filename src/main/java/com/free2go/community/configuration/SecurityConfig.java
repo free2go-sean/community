@@ -28,7 +28,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
 //                .requestMatchers(toH2Console())
-                .requestMatchers("/static/**");
+                .requestMatchers("/static/**", "/upload/**");
     }
 
     // 특정 HTTP 요청에 대한 웹 기반 보안 구성
